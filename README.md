@@ -21,22 +21,19 @@ rendered HTML representation is available.
 
 Let's test this out using Puppeteer Firefox…
 
-In any case, scraping PDFs off the Internet could probably be done using PDF.js alone, just whip
-up a Node script to download the PDF from a known URL (might use Puppeteer to scrape the URL out)
-and then load it using PDF.js and see if it has an API to extract the texts.
+In any case, I've prototyped scraping a PDF using PDF.js alone in `index.mjs`.
 
-```js
-const document = await PDFJS.getDocument('file.pdf').promise;
-for (let index = 0; index < document.pdfInfo.numPages; index++) {
-  const page = await document.getPage(index + 1);
-  const text = await page.getTextContent();
-  // Texts are in `text.items`… https://stackoverflow.com/a/55263651/2715716
-  
-  // And now onto images: https://stackoverflow.com/a/39855420/2715716
-  const opList = await page.getOperatorList();
-  for (let obj of opList.fnArray.filter(fn => fn === PDFJS.OPS.paintJpegXObject)) {
-    const image = await page.objs.get(obj[0]);
-    // Should be `<img src="data:…" />`
-  }
-}
-```
+## To-Do
+
+Use text and image coordinates to recognize clusters following patterns and use
+that information to parse out data from the texts and associate images with the
+data from the texts. Also consider applying mimimum area heuristic where images
+which cover too little are discarded because they are likely to be a part of the
+graphics and not a photo.
+
+Rotate the images to the correct orientation. To do this it might be sufficient
+to first find out if all are oriented the same way and just hardcode the
+operation or see if the PDF has any information on the transformation.
+
+See if the `transform` op (or any extra/others) can be used to keep a track of
+the coordinates at which the image file will be placed.

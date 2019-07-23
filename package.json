@@ -1,0 +1,15 @@
+{
+  "scripts": {
+    "start": "node --experimental-modules index.mjs"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/TomasHubelbauer/puppeteer-globus-scraper.git"
+  },
+  "dependencies": {
+    "@ericandrewlewis/bitmap": "^1.0.0",
+    "fs-extra": "^8.1.0",
+    "node-fetch": "^2.6.0",
+    "pdfjs-dist": "^2.1.266"
+  }
+}
