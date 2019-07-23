@@ -27,13 +27,10 @@ In any case, I've prototyped scraping a PDF using PDF.js alone in `index.mjs`.
 
 Use text and image coordinates to recognize clusters following patterns and use
 that information to parse out data from the texts and associate images with the
-data from the texts. Also consider applying mimimum area heuristic where images
-which cover too little are discarded because they are likely to be a part of the
-graphics and not a photo.
-
-Rotate the images to the correct orientation. To do this it might be sufficient
-to first find out if all are oriented the same way and just hardcode the
-operation or see if the PDF has any information on the transformation.
+data from the texts.
 
 See if the `transform` op (or any extra/others) can be used to keep a track of
 the coordinates at which the image file will be placed.
+
+Figure out and fix the problem with some images being skewed as if the length of
+their data array didn't agree to the dimensions embedded in the PDF.
