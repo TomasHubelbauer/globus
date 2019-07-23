@@ -24,3 +24,19 @@ Let's test this out using Puppeteer Firefox…
 In any case, scraping PDFs off the Internet could probably be done using PDF.js alone, just whip
 up a Node script to download the PDF from a known URL (might use Puppeteer to scrape the URL out)
 and then load it using PDF.js and see if it has an API to extract the texts.
+
+```js
+const document = await PDFJS.getDocument('file.pdf').promise;
+for (let index = 0; index < document.pdfInfo.numPages; index++) {
+  const page = await document.getPage(index + 1);
+  const text = await page.getTextContent();
+  // Texts are in `text.items`… https://stackoverflow.com/a/55263651/2715716
+  
+  // And now onto images: https://stackoverflow.com/a/39855420/2715716
+  const opList = await page.getOperatorList();
+  for (let obj of opList.fnArray.filter(fn => fn === PDFJS.OPS.paintJpegXObject)) {
+    const image = await page.objs.get(obj[0]);
+    // Should be `<img src="data:…" />`
+  }
+}
+```
