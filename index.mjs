@@ -3,7 +3,40 @@ import fs from 'fs-extra';
 import PDFJS from 'pdfjs-dist';
 import bitmap from '@ericandrewlewis/bitmap';
 
+import puppeteer from 'puppeteer-firefox';
+//import puppeteer from 'puppeteer';
+
 void async function () {
+  const browser = await puppeteer.launch({ headless: false });
+  const pages = await browser.pages();
+  const page = pages[0];
+  await page.goto('https://www.globus.cz/common/files/virtual_leaflets/335/prcm/prcm.pdf');
+  const pageCount = await page.$eval('#numPages', span => Number(span.textContent.slice('of '.length)));
+  const pageNumberInput = await page.$('#pageNumber');
+  for (let pageNumber = 1; pageNumber <= pageCount; pageNumber++) {
+    console.log(pageNumber, '/', pageCount);
+    await pageNumberInput.click({ clickCount: 3 });
+    await page.keyboard.press('Backspace');
+    await page.keyboard.type(pageNumber.toString());
+    await page.keyboard.press('Enter');
+
+    // Wait for the page container element to appear and to have it loaded data attribute appear
+    const textLayerDiv = await page.waitForSelector(`.page[data-page-number="${pageNumber}"][data-loaded="true"] .textLayer`);
+
+    // Wait for the loading indicators to disappear indicating the canvas wrapper and the text layer mounted
+    await page.waitForSelector(`.page[data-page-number="${pageNumber}"] .loadingIcon`, { hidden: true });
+    await page.waitForSelector('#pageNumber.visiblePageIsLoading', { hidden: true });
+
+    // Give it another second because there doesn't seem to be any stable way to tell it all renderer
+    await page.waitFor(1000);
+
+    const texts = await textLayerDiv.$$eval('span', spans => spans.map(span => ({ text: span.textContent.trim() })));
+    console.log(texts);
+  }
+
+  await browser.close();
+  return;
+
   await fs.ensureDir('out');
 
   // https://www.globus.cz/cerny-most/akce.html
@@ -59,11 +92,6 @@ void async function () {
 
           /** @type {Number} */
           const height = obj.height;
-
-          // Ignore small or tall/wide images which are more likely to be graphics than photos
-          if (width * height < 10 * 1000 || width < 100 || height < 100) {
-            break;
-          }
 
           // Swap lines to go top to bottom instead of bottom to top
           const data = new Uint8Array(_data.length);
