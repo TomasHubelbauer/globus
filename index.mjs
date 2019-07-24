@@ -4,7 +4,7 @@ import PDFJS from 'pdfjs-dist';
 import bitmap from '@ericandrewlewis/bitmap';
 
 void async function () {
-  await fs.ensureDir('bmps');
+  await fs.ensureDir('out');
 
   // https://www.globus.cz/cerny-most/akce.html
   // const response = await fetch('https://www.globus.cz/common/files/virtual_leaflets/335/prcm/prcm.pdf');
@@ -13,27 +13,37 @@ void async function () {
 
   const document = await PDFJS.getDocument(arrayBuffer).promise;
   for (let index = 0; index < document.numPages; index++) {
-    console.log(`Loading page ${index + 1}/${document.numPages}…`);
+    console.log(`Processing page ${index + 1}/${document.numPages}…`);
     const page = await document.getPage(index + 1);
 
-    console.log('Extracting texts:');
-    for (const text of (await page.getTextContent()).items) {
-      // TODO: See how `text.transform` relates to the transforms collected below to figure out image transforms
-      console.log('\t', text.str, text.transform);
-    }
+    let textMatrix;
+    let imageMatrix;
+    let pageSource = `<title>Page #${index + 1}</title>\n<style>span, img { position: absolute; }</style>\n`;
 
-    console.log('Extracting images:');
     const ops = await page.getOperatorList();
     for (let index = 0; index < ops.fnArray.length; index++) {
       const fn = ops.fnArray[index];
       const args = ops.argsArray[index];
 
-      // TODO: See if text extraction could be intertwined with this maybe
       switch (fn) {
+        case PDFJS.OPS.setTextMatrix: {
+          textMatrix = args;
+          break;
+        }
+        case PDFJS.OPS.showText: {
+          if (args.length !== 1) {
+            throw new Error('Expected text to be an array with a single array element.');
+          }
+
+          const text = args[0].filter(a => a.unicode).map(a => a.unicode).join('').trim();
+          if (text) {
+            pageSource += `<span style="left: ${textMatrix[4]}px; top: ${1000 - textMatrix[5]}px;">${text}</span>\n`;
+          }
+
+          break;
+        }
         case PDFJS.OPS.transform: {
-          // TODO: Resolve the image X and Y coordinates by applying these matrices
-          // https://en.wikipedia.org/wiki/Transformation_matrix#Examples_in_2D_computer_graphics
-          //console.log(args);
+          imageMatrix = args;
           break;
         }
         case PDFJS.OPS.paintImageXObject: {
@@ -67,17 +77,23 @@ void async function () {
           }
 
           const imageData = bitmap.padImageData({ unpaddedImageData: Buffer.from(data.buffer), width, height });
-          const filename = 'bmps/' + args[0] + '.bmp';
+          const filename = 'out/' + args[0] + '.bmp';
 
-          console.log(`Saving ${filename} (${width}x${height})…`, args);
+          // TODO: Figure out why the scale here gives weird numbers, do the previous transforms affect this?
+          // If yes I might need to keep the track of them and multiply them as they come to get the correct scale here.
+          const [_scaleX, _skewY, _skewX, _scaleY, transformX, transformY] = imageMatrix;
+
+          // TODO: Adjust `y` to be distance from top not from bottom (PDF default) by subtracting it from `page.view`
+          const x = Math.round(transformX);
+          const y = Math.round(transformY);
+
           await bitmap.createBitmapFile({ filename, imageData, width, height, bitsPerPixel: 24 });
+          pageSource += `<img src="${filename.slice('out/'.length)}" style="left: ${imageMatrix[4]}px; top: ${1000 - imageMatrix[5]}px;" />\n`;
           break;
-        }
-
-        default: {
-          //console.log(fn, Object.keys(PDFJS.OPS)[Object.values(PDFJS.OPS).indexOf(fn)], args);
         }
       }
     }
+
+    await fs.writeFile(`out/${index + 1}.html`, pageSource);
   }
 }()

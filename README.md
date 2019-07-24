@@ -25,16 +25,22 @@ In any case, I've prototyped scraping a PDF using PDF.js alone in `index.mjs`.
 
 ## To-Do
 
-Use text and image coordinates to recognize clusters following patterns and use
-that information to parse out data from the texts and associate images with the
-data from the texts.
+Use text and image coordinates to group them into clusters by proximity and from
+those clusters recognize ones which look like an item and parse out data from
+the texts by their position relative to one another (vertically: name, price, …,
+only a handful of variations of these datums in various order exist).
 
-See if the `transform` op (or any extra/others) can be used to keep a track of
-the coordinates at which the image file will be placed.
-From my tests it looks like transforms and images alternate so this might be as
-simple as just reading the translation values from the matrices. Most likely
-the matrix values correspond with the CSS ones so this will come in handy:
-https://developer.mozilla.org/en-US/docs/Web/CSS/transform-function/matrix
+Figure out how to calculate the correct scale of the images because the scale
+elements in the image matrices look suspect.
 
-Figure out and fix the problem with some images being skewed as if the length of
-their data array didn't agree to the dimensions embedded in the PDF.
+Find out how to straighten the images that come out skewed if they will be
+needed (associate with an item), otherwise discard them.
+
+Generate a JSON instead of page HTML files and finalize a landing page which
+loads it and allows listing among the pages, then set up GitHub Pages.
+
+Set up Azure Pipelines and run the extractor in one using a scheduled trigger.
+
+Calculate page's view based on the bounding boxes of the texts and images not
+`page.view` because the latter looks like it has incorrect values (smaller than
+the bounds of the texts and images I'm finding).
