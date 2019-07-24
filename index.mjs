@@ -36,10 +36,12 @@ void async function () {
           }
 
           const text = args[0].filter(a => a.unicode).map(a => a.unicode).join('').trim();
-          if (text) {
-            pageSource += `<span style="left: ${textMatrix[4]}px; top: ${1000 - textMatrix[5]}px;">${text}</span>\n`;
+          if (!text) {
+            break;
           }
 
+          // For the matrix see https://github.com/mozilla/pdf.js/issues/10498
+          pageSource += `<span style="left: ${textMatrix[4]}px; top: ${page.view[3] - textMatrix[5] + textMatrix[3] - 3}px; width: ${textMatrix[0]}px; height: ${textMatrix[3]}px;">${text}</span>\n`;
           break;
         }
         case PDFJS.OPS.transform: {
@@ -88,7 +90,9 @@ void async function () {
           const y = Math.round(transformY);
 
           await bitmap.createBitmapFile({ filename, imageData, width, height, bitsPerPixel: 24 });
-          pageSource += `<img src="${filename.slice('out/'.length)}" style="left: ${imageMatrix[4]}px; top: ${1000 - imageMatrix[5]}px;" />\n`;
+
+          // For the matrix see https://github.com/mozilla/pdf.js/issues/10498
+          pageSource += `<img src="${filename.slice('out/'.length)}" style="left: ${imageMatrix[4]}px; top: ${page.view[3] - imageMatrix[5] + imageMatrix[3] - 3}px; width: ${imageMatrix[0]}px; height: ${imageMatrix[3]}px;" />\n`;
           break;
         }
       }
