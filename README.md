@@ -31,6 +31,10 @@ data from the texts.
 
 See if the `transform` op (or any extra/others) can be used to keep a track of
 the coordinates at which the image file will be placed.
+From my tests it looks like transforms and images alternate so this might be as
+simple as just reading the translation values from the matrices. Most likely
+the matrix values correspond with the CSS ones so this will come in handy:
+https://developer.mozilla.org/en-US/docs/Web/CSS/transform-function/matrix
 
 Figure out and fix the problem with some images being skewed as if the length of
 their data array didn't agree to the dimensions embedded in the PDF.
