@@ -37,3 +37,9 @@ Generate a JSON instead of page HTML files and finalize a landing page which
 loads it and allows listing among the pages, then set up GitHub Pages.
 
 Set up Azure Pipelines and run the extractor in one using a scheduled trigger.
+
+`npx serve .` runs a web app (could be run in Puppeteer) that uses `canvas`
+and `textLayer` and `imageLayer` to rip off the layouting.
+Figure out why the `textLayer` is not getting called at all.
+Use the dimensions from the `imageLayer` to generate the HTML files that are
+generated in `npm start` with `node` scenario.
