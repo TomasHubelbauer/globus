@@ -25,6 +25,10 @@ In any case, I've prototyped scraping a PDF using PDF.js alone in `index.mjs`.
 
 ## To-Do
 
+### Use Playwright Firefox to scrape the PDF instead
+
+https://github.com/TomasHubelbauer/playwright-pdf
+
 ### Use text and image coordinates to group them into clusters by proximity
 
 from those clusters recognize ones which look like an item and parse out data from
