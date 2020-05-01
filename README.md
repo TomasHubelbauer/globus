@@ -1,4 +1,4 @@
-# Globus Scraper
+# Globus
 
 Globus provides a PDF catalog of offers for the period. This is a good exercise for PDF scraping.
 
@@ -12,7 +12,7 @@ Playwright Firefox can be used as Firefox uses PDF.js internally when navigating
 
 ### Use Playwright Firefox to scrape the PDF instead
 
-Like in https://github.com/TomasHubelbauer/albert-pdf
+Like in https://github.com/TomasHubelbauer/albert
 
 ### Use text and image coordinates to group them into clusters by proximity
 
