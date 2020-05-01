@@ -1,33 +1,18 @@
-# Puppeteer Globus Scraper
+# Globus Scraper
 
-Puppeteer is good at scraping web pages, but some content is "gated" by being stored in PDF files
-which the user is redirected to for their browser to render.
+Globus provides a PDF catalog of offers for the period. This is a good exercise for PDF scraping.
 
-Both Firefox and Chrome render PDFs by converting them to HTML representations, Firefox uses pdf.js
-for this and Chrome some sort of an extension which is accessible through an `embed` object.
+Puppeteer cannot be used, because it cannot navigate to a PDF. The PDF viewer component in Chrome
+is a native component which is not available in Chromium. One would have to use PDF.js either in
+or outside of Puppeteer to get the job done.
 
-In Chrome, *Inspect* is available on elements in that HTML representation, but in the Elements page,
-it highlights the `embed` node and won't go any further, so Puppeteer couldn't be used to inspect
-and scrape the contents of a PDF by treating as an HTML page most likely.
-
-We now have Puppeteer-Firefox as an experimental extension to Puppeteer which itself doesn't
-implement PDF export, but it doesn't matter, because for this experiment I am interested in the
-opposite.
-
-Could Puppeteer Firefox be used to navigate to a PDF file and then query the DOM of the HTML
-representation created from the PDF by Firefox using PDF.js? The text in the PDFs is selectable
-in both and Firefox and Chrome so it should be possible to extract it as text if the DOM of the
-rendered HTML representation is available.
-
-Let's test this out using Puppeteer Firefox…
-
-In any case, I've prototyped scraping a PDF using PDF.js alone in `index.mjs`.
+Playwright Firefox can be used as Firefox uses PDF.js internally when navigating to PDF documents.
 
 ## To-Do
 
 ### Use Playwright Firefox to scrape the PDF instead
 
-https://github.com/TomasHubelbauer/playwright-pdf
+Like in https://github.com/TomasHubelbauer/albert-pdf
 
 ### Use text and image coordinates to group them into clusters by proximity
 
@@ -35,21 +20,6 @@ from those clusters recognize ones which look like an item and parse out data fr
 the texts by their position relative to one another (vertically: name, price, …,
 only a handful of variations of these datums in various order exist).
 
-### Find out how to straighten the images that come out skewed
-
-if they will be needed (associate with an item), otherwise discard them.
-
-### Generate a JSON instead of page HTML files and finalize a landing page
-
-which loads it and allows listing among the pages, then set up GitHub Pages.
+### Generate an HTML page for visualizing what the script associated in clustering
 
 ### Set up Github Actions and run the extractor in one using a scheduled trigger
-
-### `npx serve .` runs a web app (could be run in Puppeteer) that uses `canvas`
-
-and `textLayer` and `imageLayer` to rip off the layouting.
-Figure out why the `textLayer` is not getting called at all.
-
-### Use the dimensions from the `imageLayer` to generate the HTML files
-
-that are generated in `npm start` with `node` scenario.
